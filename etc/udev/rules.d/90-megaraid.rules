@@ -1,0 +1,24 @@
+# MegaRAID udev rules
+# Requires the megaraid_id script, Python3 and the LSI/Avago/Broadcom storcli64 tool
+#
+# MegaRAID links:
+#
+# Virtual disks: /dev/megaraid/c{controller_index}/vd{vd_index}
+# E.g.: /dev/megaraid/c0/vd3
+#
+# JBODs: /dev/megaraid/c{controller_index}/e{enclosure_index}/s{slot}
+# E.g.: /dev/megaraid/c0/e252/s4
+#
+
+# Extract MegaRAID metadata from any disks exposed through the megaraid_sas driver
+ENV{DEVTYPE}=="disk", DRIVERS=="megaraid_sas", ENV{ID_WWN_WITH_EXTENSION}=="?*", \
+  IMPORT{program}="/etc/udev/megaraid_id -w $env{ID_WWN_WITH_EXTENSION}"
+
+# Virtual disks (VDs)
+ENV{ID_MEGARAID_CONTROLLER}=="?*", ENV{ID_MEGARAID_VD}=="?*", \
+  SYMLINK+="megaraid/c$env{ID_MEGARAID_CONTROLLER}/v$env{ID_MEGARAID_VD}"
+
+# JBODs
+ENV{ID_MEGARAID_CONTROLLER}=="?*", ENV{ID_MEGARAID_JBOD_ENCLOSURE}=="?*", \
+  ENV{ID_MEGARAID_JBOD_SLOT}=="?*", \
+  SYMLINK+="megaraid/c$env{ID_MEGARAID_CONTROLLER}/e$env{ID_MEGARAID_JBOD_ENCLOSURE}/s$env{ID_MEGARAID_JBOD_SLOT}"

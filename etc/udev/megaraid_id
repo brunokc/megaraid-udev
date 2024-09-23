@@ -1,0 +1,127 @@
+#!/usr/bin/env python3
+"""
+megaraid_id: script used to extract LSI/Avago/Broadcom MegaRAID specific data from
+virtual disks (VDs) and driver (JBODs). Use it together with the appropriate udev
+rules to expose VDs and JBODs using MegaRAID's IDs
+
+Examples:
+VD3 is exposed via /dev/megaraid/c0/vd3
+drive /c0/e252/s4 is exposed via /dev/megaraid/c0/e252/s4
+"""
+
+import argparse
+import logging
+import os
+import json
+import re
+
+_LOGGER = logging.getLogger(__name__)
+
+STORCLI = "/opt/MegaRAID/storcli/storcli64"
+VD_DATA_RE = re.compile(r"VD(\d+) Properties")
+JBOD_DRIVE_RE = re.compile(r"Drive /c\d+/e(\d+)/s(\d+)$")
+
+
+def run_shell_command(command):
+    stream = os.popen(command)
+    data = json.loads(stream.read())
+    return data
+
+
+def get_megaraid_vd_data():
+    command = f"{STORCLI} /call /vall show all j"
+    _LOGGER.info("running command: %s", command)
+    output = run_shell_command(command)
+    return output
+
+
+def get_megaraid_jbod_data():
+    command = f"{STORCLI} /call /eall /sall show all j"
+    _LOGGER.info("running command: %s", command)
+    output = run_shell_command(command)
+    return output
+
+
+def find_vds(controller, wwn):
+    controller_index = controller["Command Status"]["Controller"]
+    _LOGGER.info(f"processing controller %d", controller_index)
+    response_data = controller.get("Response Data")
+    _LOGGER.debug("response data: %s", response_data)
+    if response_data:
+        for key, data in response_data.items():
+            _LOGGER.info("processing key %s", key)
+            match = VD_DATA_RE.search(key)
+            if match:
+                vd = int(match.group(1))
+                vd_drive = data["OS Drive Name"]
+                vd_wwn = "0x" + data["SCSI NAA Id"].lower()
+                _LOGGER.info("saving vd_drive=%s; vd_wwn=%s", vd_drive, vd_wwn)
+                _LOGGER.info("(controller=%d; vd=%d)", controller_index, vd)
+
+                if wwn and wwn == vd_wwn:
+                    print(f"ID_MEGARAID_CONTROLLER={controller_index}")
+                    print(f"ID_MEGARAID_VD={vd}")
+                    print(f"ID_MEGARAID_VD_DRIVE={vd_drive}")
+                    print(f"ID_MEGARAID_VD_WWN={vd_wwn}")
+                    break
+
+
+def find_jbods(controller, wwn):
+    controller_index = controller["Command Status"]["Controller"]
+    _LOGGER.info(f"processing controller %d", controller_index)
+    response_data = controller.get("Response Data")
+    _LOGGER.debug("response data: %s", response_data)
+    if response_data:
+        for key, data in response_data.items():
+            _LOGGER.info("processing key %s", key)
+            match = JBOD_DRIVE_RE.search(key)
+            if match:
+                if data[0]["State"] != "JBOD":
+                    continue
+
+                enclosure = int(match.group(1))
+                slot = int(match.group(2))
+
+                details = response_data[f"Drive /c{controller_index}/e{enclosure}/s{slot} - Detailed Information"]
+                attributes = details[f"Drive /c{controller_index}/e{enclosure}/s{slot} Device attributes"]
+                jbod_wwn = "0x" + attributes["WWN"].lower()
+                jbod_sn = attributes["SN"].strip()
+                _LOGGER.info("saving jbod_sn=%s; jbod_wwn=%s", jbod_sn, jbod_wwn)
+                _LOGGER.info("(controller=%d; enclosure=%d; slot=%d)", controller_index, enclosure, slot)
+
+                if wwn and wwn == jbod_wwn:
+                    print(f"ID_MEGARAID_CONTROLLER={controller_index}")
+                    print(f"ID_MEGARAID_JBOD_ENCLOSURE={enclosure}")
+                    print(f"ID_MEGARAID_JBOD_SLOT={slot}")
+                    print(f"ID_MEGARAID_JBOD_SN={jbod_sn}")
+                    print(f"ID_MEGARAID_JBOD_WWN={jbod_wwn}")
+                    break
+
+
+def print_device_ids(args):
+    output = get_megaraid_vd_data()
+    for controller in output["Controllers"]:
+        find_vds(controller, args.wwn)
+
+    output = get_megaraid_jbod_data()
+    for controller in output["Controllers"]:
+        find_jbods(controller, args.wwn)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Report device IDs given a LSI/AVAGO/Broadcom MegaRAID device ID"
+        )
+    parser.add_argument("-w", "--wwn", help="Identify the device by WWN (e.g.: 0x600605b0038b78d01620f3ff2c26cfe0",
+                        required=True)
+    parser.add_argument("-v", "--verbose", help="Turn on verbose output",
+                        action="store_true")
+    args = parser.parse_args()
+
+    if args.verbose:
+        logging.basicConfig(level=logging.INFO)
+
+    print_device_ids(args)
+
+if __name__ == "__main__":
+    main()
