@@ -31,7 +31,8 @@ Note: newer adapters use a newer StorCli2 tool which hasn't been tested
 
 ## Installation
 
-1. Copy the contents of the `/etc` folder to your device
+0. Ensure udev is installed and running on your system (it should be as it's pretty common)
+1. Copy the contents of the `/etc` directory to your device
 2. Ensure `/etc/udev/megaraid_id` script is executable
 
 ```shell
