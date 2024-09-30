@@ -44,3 +44,41 @@ sudo chmod 755 /etc/udev/megaraid_id
 ```shell
 sudo udevadm trigger
 ```
+
+## Examples
+
+In this example, there's only a single drive set as JBOD attached to controller 0:
+
+```
+root@host:~# /opt/MegaRAID/storcli/storcli64 /c0 /eall /sall show jbod
+[...]
+------------------------------------------------------------------------------------------
+EID:Slt DID State Intf Med       Size SeSz Model                   Vendor   Port
+------------------------------------------------------------------------------------------
+252:4    23 JBOD  SATA SSD 931.512 GB 512B Samsung SSD 860 EVO 1TB ATA      Port 4 - 7 x1
+------------------------------------------------------------------------------------------
+[...]
+root@host:~# ls -l /dev/megaraid/c0/e252
+total 0
+lrwxrwxrwx 1 root root 12 Sep 30 11:39 s4 -> ../../../sdb
+```
+
+Next, there are 5 virtual drives attached to the same controller (controller 0):
+
+```
+[...]
+------------------------------------------------------------------------
+DG/VD TYPE  State Access Consist Cache Cac sCC       Size Name
+------------------------------------------------------------------------
+1/0   RAID1 Optl  RW     Yes     RWBD  -   ON  931.000 GB VM Store
+2/1   RAID1 Optl  RW     Yes     RWBD  -   ON  931.000 GB Backup
+0/2   RAID1 Optl  RW     Yes     RWBD  -   ON    1.818 TB New VM Store
+------------------------------------------------------------------------
+[...]
+root@host:~# ls -l /dev/megaraid/c0
+total 0
+drwxr-xr-x 2 root root 60 Sep 30 11:39 e252
+lrwxrwxrwx 1 root root  9 Sep 30 11:39 v0 -> ../../sda
+lrwxrwxrwx 1 root root  9 Sep 30 11:39 v1 -> ../../sdc
+lrwxrwxrwx 1 root root  9 Sep 30 11:39 v2 -> ../../sdd
+```
