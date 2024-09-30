@@ -5,8 +5,8 @@ virtual disks (VDs) and driver (JBODs). Use it together with the appropriate ude
 rules to expose VDs and JBODs using MegaRAID's IDs
 
 Examples:
-VD3 is exposed via /dev/megaraid/c0/vd3
-drive /c0/e252/s4 is exposed via /dev/megaraid/c0/e252/s4
+Virtual drive /c0/v3 is exposed via /dev/megaraid/c0/v3
+Drive /c0/e252/s4 is exposed via /dev/megaraid/c0/e252/s4
 """
 
 import argparse
