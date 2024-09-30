@@ -63,7 +63,7 @@ total 0
 lrwxrwxrwx 1 root root 12 Sep 30 11:39 s4 -> ../../../sdb
 ```
 
-Next, there are 5 virtual drives attached to the same controller (controller 0):
+In the example below, there are 3 virtual drives attached to controller 0:
 
 ```
 [...]
