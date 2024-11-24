@@ -23,11 +23,12 @@ under `/dev/megaraid` that point to the actual OS devices.
   4. Under that node, look for the most recent StorCli download available for
   your adapter
      1. For SAS 3.5 adapters (SAS31xx-based, e.g.: 9361-8i), as of Sep/2024, the
-     latest StorCli available is the Phase32 release (`STORCLI_SAS3.5_P32.zip`)
+     latest StorCli available is the Phase32 release (`STORCLI_SAS3.5_P32.zip`),
+     version 007.3103.0000.0000. Direct link [here](https://docs.broadcom.com/docs/STORCLI_SAS3.5_P32.zip).
   5. Download the zip file, extract it and follow the instructions. For
   Debian-based systems install the `.deb` package found under the Ubuntu folder.
 
-Note: newer adapters use a newer StorCli2 tool which hasn't been tested
+Note: newer adapters use a newer StorCli2 tool which hasn't been tested.
 
 ## Installation
 
