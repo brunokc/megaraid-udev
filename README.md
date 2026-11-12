@@ -62,6 +62,7 @@ EID:Slt DID State Intf Med       Size SeSz Model                   Vendor   Port
 root@host:~# ls -l /dev/megaraid/c0/e252
 total 0
 lrwxrwxrwx 1 root root 12 Sep 30 11:39 s4 -> ../../../sdb
+lrwxrwxrwx 1 root root 12 Sep 30 11:39 s4-part1 -> ../../../sdb1
 ```
 
 In the example below, there are 3 virtual drives attached to controller 0:
@@ -79,7 +80,12 @@ DG/VD TYPE  State Access Consist Cache Cac sCC       Size Name
 root@host:~# ls -l /dev/megaraid/c0
 total 0
 drwxr-xr-x 2 root root 60 Sep 30 11:39 e252
-lrwxrwxrwx 1 root root  9 Sep 30 11:39 v0 -> ../../sda
-lrwxrwxrwx 1 root root  9 Sep 30 11:39 v1 -> ../../sdc
-lrwxrwxrwx 1 root root  9 Sep 30 11:39 v2 -> ../../sdd
+lrwxrwxrwx 1 root root  9 Sep 30 11:39 vd0 -> ../../sda
+lrwxrwxrwx 1 root root  9 Sep 30 11:39 vd0-part1 -> ../../sda1
+lrwxrwxrwx 1 root root  9 Sep 30 11:39 vd0-part2 -> ../../sda2
+lrwxrwxrwx 1 root root  9 Sep 30 11:39 vd1 -> ../../sdc
+lrwxrwxrwx 1 root root  9 Sep 30 11:39 vd1-part1 -> ../../sdc1
+lrwxrwxrwx 1 root root  9 Sep 30 11:39 vd1-part2 -> ../../sdc2
+lrwxrwxrwx 1 root root  9 Sep 30 11:39 vd2 -> ../../sdd
+lrwxrwxrwx 1 root root  9 Sep 30 11:39 vd2-part1 -> ../../sdd1
 ```
